@@ -1,5 +1,6 @@
 import datetime as dt
 import math
+import random
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -16,7 +17,8 @@ class numerical_methods():
         self.I = 500
         self.paths = paths
 
-    def MC(self):
+    def random_numbers(self):
+        random.seed(1)
         dt = float(self.T)/self.N
         self.paths = np.zeros((self.N + 1, self.I), np.float64)
         self.paths[0] = self.S0
@@ -27,6 +29,9 @@ class numerical_methods():
         self.plot()
         return self.paths
 
+    def OU_MC(self):
+        return None
+
     def plot(self):
         plt.title("Price paths")
         plt.xlabel("Time")
@@ -35,14 +40,15 @@ class numerical_methods():
         #plt.savefig('MC_sims.png')
         return None
 
+
 class BS_pricer():
     def __init__(self, S, call_delta, call_gamma, call_vega, call_theta, put_delta, put_gamma, put_vega, put_theta):
         self.S = S
         self.K = 100
         self.r = 0.1
-        self.ttm = 252
+        self.ttm = 1
         self.sigma = 0.2
-        self.d1 = (np.log(self.S / self.K) + (self.r + self.sigma ** 2) * self.ttm) / self.sigma * np.sqrt(self.ttm)
+        self.d1 = (np.log(self.S / self.K) + (self.r + (self.sigma ** 2)/2) * self.ttm) / self.sigma * np.sqrt(self.ttm)
         self.d2 = self.d1 - self.sigma * np.sqrt(self.ttm)
         self.call_delta = call_delta
         self.call_gamma = call_gamma
@@ -72,3 +78,27 @@ class BS_pricer():
             self.put_gamma.append(norm.pdf(self.d1) / (self.S * self.sigma * np.sqrt(self.ttm)))
             self.put_vega.append(self.S * norm.pdf(self.d1) * np.sqrt(self.ttm))
             self.put_theta.append(- ((self.S * norm.pdf(self.d1) * self.sigma) / 2 * np.sqrt(self.ttm)) + self.r * self.K * np.exp(-self.r * self.ttm) * norm.cdf(-self.d1))
+
+
+class hedged_account():
+    def __init__(self, delta, gamma, spot_price, option_position):
+        self.delta = delta
+        self.gamma = gamma
+        self.spot_price = spot_price
+        self.option_position = option_position
+
+    @staticmethod
+    def pnl(underlying, option):
+        underlying_pnl = underlying.diff()
+        underlying_pnl = underlying_pnl.fillna(0)
+        option_pnl = option.diff()
+        option_pnl = option_pnl.fillna(0)
+        return underlying_pnl, option_pnl
+
+
+    def delta_hedging(self):
+        hedge = - self.delta * self.spot_price
+        return hedge
+
+    def rebalance(self):
+        return None
