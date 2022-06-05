@@ -81,11 +81,16 @@ class BS_pricer():
 
 
 class hedged_account():
+    #buy 1 call and 1 put at t0
+    #adjust hedge daily
+    #measure hedged pnl
     def __init__(self, delta, gamma, spot_price, option_position):
         self.delta = delta
         self.gamma = gamma
         self.spot_price = spot_price
         self.option_position = option_position
+        self.ttm = 1
+        self.r = 0.1
 
     @staticmethod
     def pnl(underlying, option):
@@ -95,10 +100,21 @@ class hedged_account():
         option_pnl = option_pnl.fillna(0)
         return underlying_pnl, option_pnl
 
+    def bank(self, hedge1, hedge2):
+        account = []
+        account.append(np.exp(-self.ttm*self.r)*(hedge1 + hedge2))
+        return None
 
     def delta_hedging(self):
         hedge = - self.delta * self.spot_price
         return hedge
 
-    def rebalance(self):
-        return None
+    def rebalance(self, pnl, hedge):
+        delta_diff = self.delta.diff()
+        delta_diff = delta_diff.fillna(0)
+        portfolio = []
+        for idx, i in enumerate(hedge):
+            for idx2, j in enumerate(hedge[idx]):
+                portfolio.append(hedge[idx][idx2] + self.option_position[1][idx][idx2])
+        return portfolio
+
