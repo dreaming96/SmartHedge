@@ -38,6 +38,7 @@ class numerical_methods():
         plt.ylabel("Price")
         plt.plot(self.paths, linewidth=0.5)
         #plt.savefig('MC_sims.png')
+        plt.clf()
         return None
 
 
@@ -84,10 +85,11 @@ class hedged_account():
     #buy 1 call and 1 put at t0
     #adjust hedge daily
     #measure hedged pnl
-    def __init__(self, delta, gamma, spot_price, option_position):
+    def __init__(self, delta, gamma, spot_price, option_price, option_position):
         self.delta = delta
         self.gamma = gamma
         self.spot_price = spot_price
+        self.option_price = option_price
         self.option_position = option_position
         self.ttm = 1
         self.r = 0.1
@@ -112,9 +114,22 @@ class hedged_account():
     def rebalance(self, pnl, hedge):
         delta_diff = self.delta.diff()
         delta_diff = delta_diff.fillna(0)
-        portfolio = []
-        for idx, i in enumerate(hedge):
-            for idx2, j in enumerate(hedge[idx]):
-                portfolio.append(hedge[idx][idx2] + self.option_position[1][idx][idx2])
+        portfolio = pnl[0] * 0
+        # portfolio = hedge + (delta_diff * self.option_position[1])
+        for idx, i in enumerate(self.spot_price):
+            for idx2, j in enumerate(self.spot_price[idx]):
+                if idx2 == 0:
+                    portfolio[idx][0] = self.option_price[idx][0]
+                else:
+                    portfolio[idx][idx2] = self.option_price[idx][0] + delta_diff[idx][idx2] * pnl[0][idx][idx2]
+        for col in portfolio:
+            plt.plot(portfolio[col])
+        plt.show()
+        plt.clf()
+
+        hedge_pnl = portfolio.diff()
+        hedge_pnl = hedge_pnl.fillna(0)
+        plt.hist(hedge_pnl)
+        plt.show()
         return portfolio
 

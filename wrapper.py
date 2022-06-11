@@ -32,7 +32,7 @@ if __name__ == "__main__":
                     put_theta.iloc[i, idx] = bs_instance.put_theta[0]
 
     pnl = hedged_account.pnl(simulated_prices, call_prices)
-    account_instance = hedged_account(delta=call_delta, gamma=call_gamma, spot_price=simulated_prices, option_position=pnl)
+    account_instance = hedged_account(delta=call_delta, gamma=call_gamma, spot_price=simulated_prices, option_price=call_prices, option_position=pnl)
     hedge = hedged_account.delta_hedging(account_instance)
     hedged_pnl = hedged_account.rebalance(account_instance, pnl, hedge)
 
