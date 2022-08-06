@@ -1,4 +1,5 @@
 from data_handling import numerical_methods, BS_pricer, hedged_account
+from SmartHedge import SmartHedge
 
 if __name__ == "__main__":
     type = ["call", "put"]
@@ -31,9 +32,14 @@ if __name__ == "__main__":
                     put_vega.iloc[i, idx] = bs_instance.put_vega[0]
                     put_theta.iloc[i, idx] = bs_instance.put_theta[0]
 
+    #calculating pnl and hedge pnl
     pnl = hedged_account.pnl(simulated_prices, call_prices)
     account_instance = hedged_account(delta=call_delta, gamma=call_gamma, spot_price=simulated_prices, option_price=call_prices, option_position=pnl)
     hedge = hedged_account.delta_hedging(account_instance)
     hedged_pnl = hedged_account.rebalance(account_instance, pnl, hedge)
+
+    #LSTM class
+    LSTM_instance = SmartHedge(simulated_prices, 100, 0.1, 1, call_delta, put_delta)
+    SmartHedge.LSTM(LSTM_instance)
 
     print(123)
