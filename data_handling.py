@@ -13,8 +13,8 @@ class numerical_methods():
         self.mu = 0.05
         self.sigma = 0.2
         self.T = 1
-        self.N = 252
-        self.I = 500
+        self.N = 504
+        self.I = 1
         self.paths = paths
 
     def random_numbers(self):
@@ -26,7 +26,7 @@ class numerical_methods():
             rand = np.random.standard_normal(self.I)
             self.paths[t] = self.paths[t - 1] * np.exp((self.r - 0.5 * self.sigma ** 2) * dt + self.sigma * np.sqrt(dt) * rand)
         self.paths = pd.DataFrame(self.paths)
-        self.plot()
+        # self.plot()
         return self.paths
 
     def OU_MC(self):
@@ -43,11 +43,11 @@ class numerical_methods():
 
 
 class BS_pricer():
-    def __init__(self, S, call_delta, call_gamma, call_vega, call_theta, put_delta, put_gamma, put_vega, put_theta):
+    def __init__(self, S, call_delta, call_gamma, call_vega, call_theta, put_delta, put_gamma, put_vega, put_theta, ttm):
         self.S = S
         self.K = 100
         self.r = 0.1
-        self.ttm = 1
+        self.ttm = ttm
         self.sigma = 0.2
         self.d1 = (np.log(self.S / self.K) + (self.r + (self.sigma ** 2)/2) * self.ttm) / self.sigma * np.sqrt(self.ttm)
         self.d2 = self.d1 - self.sigma * np.sqrt(self.ttm)
@@ -91,7 +91,8 @@ class hedged_account():
         self.spot_price = spot_price
         self.option_price = option_price
         self.option_position = option_position
-        self.ttm = 1
+        self.ttm = [n/len(self.delta) for n in range(1,len(self.delta))]
+        self.ttm.reverse()
         self.r = 0.1
 
     @staticmethod
@@ -115,21 +116,15 @@ class hedged_account():
         delta_diff = self.delta.diff()
         delta_diff = delta_diff.fillna(0)
         portfolio = pnl[0] * 0
-        # portfolio = hedge + (delta_diff * self.option_position[1])
         for idx, i in enumerate(self.spot_price):
             for idx2, j in enumerate(self.spot_price[idx]):
                 if idx2 == 0:
                     portfolio[idx][0] = self.option_price[idx][0]
                 else:
                     portfolio[idx][idx2] = self.option_price[idx][0] + delta_diff[idx][idx2] * pnl[0][idx][idx2]
-        for col in portfolio:
-            plt.plot(portfolio[col])
-        plt.show()
-        plt.clf()
-
         hedge_pnl = portfolio.diff()
         hedge_pnl = hedge_pnl.fillna(0)
         plt.hist(hedge_pnl)
-        plt.show()
-        return portfolio
+        plt.clf()
+        return portfolio, delta_diff
 
