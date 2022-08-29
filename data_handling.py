@@ -116,15 +116,18 @@ class hedged_account():
         delta_diff = self.delta.diff()
         delta_diff = delta_diff.fillna(0)
         portfolio = pnl[0] * 0
+        portfolio_unhedged = pnl[0] * 0
         for idx, i in enumerate(self.spot_price):
             for idx2, j in enumerate(self.spot_price[idx]):
                 if idx2 == 0:
                     portfolio[idx][0] = self.option_price[idx][0]
+                    portfolio_unhedged[idx][0] = self.option_price[idx][0]
                 else:
                     portfolio[idx][idx2] = self.option_price[idx][0] + delta_diff[idx][idx2] * pnl[0][idx][idx2]
+                    portfolio_unhedged[idx][idx2] = self.option_price[idx][0] + pnl[0][idx][idx2]
         hedge_pnl = portfolio.diff()
         hedge_pnl = hedge_pnl.fillna(0)
         plt.hist(hedge_pnl)
         plt.clf()
-        return portfolio, delta_diff
+        return portfolio, delta_diff, portfolio_unhedged
 

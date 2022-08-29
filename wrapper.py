@@ -39,11 +39,11 @@ if __name__ == "__main__":
     pnl = hedged_account.pnl(simulated_prices, call_prices)
     account_instance = hedged_account(delta=call_delta, gamma=call_gamma, spot_price=simulated_prices, option_price=call_prices, option_position=pnl)
     hedge = hedged_account.delta_hedging(account_instance)
-    hedged_pnl, delta_diff = hedged_account.rebalance(account_instance, pnl, hedge)
+    hedged_pnl, delta_diff, u = hedged_account.rebalance(account_instance, pnl, hedge)
 
     #LSTM class
-    LSTM_instance = SmartHedge(M=simulated_prices[0:-1]/100, r=0.1, ttm=ttm[1:], call_delta=call_delta[0:-1], put_delta=put_delta[0:-1], sigma=0.2
-                               ,S0=simulated_prices[0:-1], S1=simulated_prices[1:], C0=call_prices[0:-1], C1=call_prices[1:], delta_diff=delta_diff)
+    LSTM_instance = SmartHedge(M=simulated_prices[0:-1]/100, K=100, r=0.1, ttm=ttm[0:-1], call_delta=call_delta[0:-1], put_delta=put_delta[0:-1], sigma=0.2
+                               ,S0=simulated_prices[0:-1], S1=simulated_prices[1:], C0=call_prices[0:-1], C1=call_prices[1:], delta_diff=delta_diff, u=hedged_pnl[0:-1])
     SmartHedge.LSTM(LSTM_instance)
 
     print(123)
