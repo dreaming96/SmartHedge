@@ -13,12 +13,12 @@ class numerical_methods():
         self.mu = 0.05
         self.sigma = 0.2
         self.T = 1
-        self.N = 504
-        self.I = 1
+        self.N = 252
+        self.I = 50
         self.paths = paths
 
     def random_numbers(self):
-        random.seed(1)
+        random.seed()
         dt = float(self.T)/self.N
         self.paths = np.zeros((self.N + 1, self.I), np.float64)
         self.paths[0] = self.S0
@@ -123,6 +123,7 @@ class hedged_account():
                     portfolio[idx][0] = self.option_price[idx][0]
                     portfolio_unhedged[idx][0] = self.option_price[idx][0]
                 else:
+                    print("calculating hedged pnl on day "+ str(idx) + ", path " + str(idx2))
                     portfolio[idx][idx2] = self.option_price[idx][0] + delta_diff[idx][idx2] * pnl[0][idx][idx2]
                     portfolio_unhedged[idx][idx2] = self.option_price[idx][0] + pnl[0][idx][idx2]
         hedge_pnl = portfolio.diff()

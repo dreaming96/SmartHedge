@@ -2,7 +2,7 @@ from data_handling import numerical_methods, BS_pricer, hedged_account
 from SmartHedge import SmartHedge
 
 if __name__ == "__main__":
-    type = ["call", "put"]
+    type = ["call"]
     #loop for train and test (2x MC)
     mc_instance = numerical_methods([])
     numerical_methods.random_numbers(mc_instance)
@@ -16,6 +16,7 @@ if __name__ == "__main__":
     ttm.insert(0, float(1))
     for i, row in simulated_prices.iterrows():
         for idx, j in enumerate(row):
+            print("pricing option on day " + str(i) +", path " + str(idx))
             bs_instance = BS_pricer(S=j, call_delta=[], call_gamma=[], call_vega=[], call_theta=[], put_delta=[], put_gamma=[], put_vega=[], put_theta=[], ttm=ttm[i])
             for k in type:
                 if k.upper() == "CALL":
